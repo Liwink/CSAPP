@@ -2,13 +2,12 @@
 #include <assert.h>
 
 int leftmost_one(unsigned x) {
-    unsigned long val = (unsigned long) x;
-    val |= val >> 1;
-    val |= val >> 2;
-    val |= val >> 4;
-    val |= val >> 8;
-    val |= val >> 16;
-    return (int) ((val + 1) >> 1);
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return x & ~(x >> 1);
 }
 
 int main(int argc, char* argv[]) {
