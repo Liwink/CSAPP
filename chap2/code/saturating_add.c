@@ -20,6 +20,22 @@ int saturating_add(int x, int y) {
     return sum;
 }
 
+int saturating_add_b(int x, int y) {
+    // an elegant(or trick?) solution
+    // from https://github.com/DreamAndDead/CSAPP-3e-Solutions/blob/master/chapter2/2.73.md
+
+    int sum = x + y;
+    int sig_mask = INT_MIN;
+
+    int pos_over = !(x & sig_mask) && !(y & sig_mask) && (sum & sig_mask);
+    int neg_over = (x & sig_mask) && (y & sig_mask) && !(sum & sig_mask);
+
+    // here is a smart "trick"!
+    (pos_over && (sum = INT_MAX)) || (neg_over && (sum = INT_MIN));
+
+    return sum;
+}
+
 int main(int argc, char* argv[]) {
     // printf("%d\n", saturating_add(INT_MAX, 1));
     // printf("%d\n", saturating_add(INT_MIN, -1));
