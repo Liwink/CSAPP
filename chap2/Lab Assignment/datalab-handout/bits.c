@@ -273,7 +273,12 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  int mask = 1 << 31;
+  // `pos` include positive and zero
+  int x_neg_y_pos = !!(x & mask) & !(y & mask);
+  int x_pos_y_pos = !(x & mask) & !(y & mask) & !!((x + ~y) & mask);
+  int x_neg_y_neg = !!(x & mask) & !!(y & mask) & !!((x + ~y) & mask);
+  return x_neg_y_pos | x_pos_y_pos | x_neg_y_neg;
 }
 
 /*
@@ -284,8 +289,20 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
-  return 2;
+  // only pos first
+  x |= x >>16;
+  x |= x >>8;
+  x |= x >>4;
+  x |= x >>2;
+  x |= x >>1;
+  x = ((0xaaaaaaaa & x) >> 1) + (0x55555555 & x);
+  x = ((0xcccccccc & x) >> 2) + (0x33333333 & x);
+  x = ((0xf0f0f0f0 & x) >> 4) + (0x0f0f0f0f & x);
+  x = ((0xff00ff00 & x) >> 8) + (0x00ff00ff & x);
+  x = ((0xffff0000 & x) >> 16) + (0x0000ffff & x);
+  return x - 1;
 }
+
 /*
  * float_neg - Return bit-level equivalent of expression -f for
  *   floating point argument f.
