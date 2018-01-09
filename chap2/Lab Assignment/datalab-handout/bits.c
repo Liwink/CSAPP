@@ -315,8 +315,12 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+  unsigned ufs = uf | (1 << 31);
+  unsigned mask_norm = (1 << 31 >> 8);
+  if ((ufs & mask_norm) == mask_norm && (ufs != mask_norm)) return uf;
+  return uf ^ (1 << 31);
 }
+
 /*
  * float_i2f - Return bit-level equivalent of expression (float) x
  *   Result is returned as unsigned int, but
@@ -327,8 +331,29 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
+  if (x == 0) return x;
+  if (x == (1 << 31)) return -822083584;
+
+  unsigned s = 0;
+  if (x < 0) {
+    x = -x;
+    s = 1;
+  }
+
+  if (x <= 1 << 28) {
+    unsigned mask = 1 << 31;
+    unsigned count = 0;
+    while (!(x && mask)) {
+      mask = mask >> 1;
+      count++;
+    }
+    unsigned frac = x - (1 << (31 - count));
+    unsigned exp = 127 + 31 - count;
+    return (s << 31) + (exp << 27) + (frac << (count - 4));
+  }
   return 2;
 }
+
 /*
  * float_twice - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
