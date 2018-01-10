@@ -332,7 +332,6 @@ unsigned float_neg(unsigned uf) {
  */
 unsigned float_i2f(int x) {
   if (x == 0) return x;
-  if (x == (1 << 31)) return -822083584;
 
   unsigned s = 0;
   if (x < 0) {
@@ -340,18 +339,20 @@ unsigned float_i2f(int x) {
     s = 1;
   }
 
-  if (x <= 1 << 28) {
-    unsigned mask = 1 << 31;
-    unsigned count = 0;
-    while (!(x && mask)) {
-      mask = mask >> 1;
-      count++;
-    }
-    unsigned frac = x - (1 << (31 - count));
-    unsigned exp = 127 + 31 - count;
-    return (s << 31) + (exp << 27) + (frac << (count - 4));
+  unsigned mask = 1 << 31;
+  unsigned count = 0;
+  while ((x & mask) == 0) {
+    mask = mask >> 1;
+    count += 1;
   }
-  return 2;
+  unsigned frac = x - (1 << (31 - count));
+  unsigned exp = 127 + 31 - count;
+  unsigned round = 0;
+  unsigned mod = frac & ~(1 << 31 >> count >> 23);
+  unsigned judge = 1 << 7 >> count;
+  if (mod > judge) round = 1;
+  else if ((mod == judge) && (mod != 0) && (frac & (1 << 8 >> count))) round = 1;
+  return (s << 31) + (exp << 23) + (frac << count >> 8) + round;
 }
 
 /*
