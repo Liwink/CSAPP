@@ -345,6 +345,7 @@ unsigned float_i2f(int x) {
     mask = mask >> 1;
     count += 1;
   }
+
   unsigned frac = x - (1 << (31 - count));
   unsigned exp = 127 + 31 - count;
   unsigned round = 0;
@@ -367,5 +368,15 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+  signed mask = 1 << 31;
+  unsigned ufs = uf | mask;
+  unsigned mask_norm = (mask >> 8);
+  // if ((ufs & mask_norm) == mask_norm && (ufs != mask_norm)) return uf;
+  if ((ufs & mask_norm) == mask_norm ) return uf;
+  // 0
+  if ((uf & ~mask) == 0) return uf;
+  // denormalized
+  if (((uf << 1) & (mask >> 7)) == 0) return (uf & mask) + (uf << 1);
+  // normalized
+  return uf + (1 << 23);
 }
