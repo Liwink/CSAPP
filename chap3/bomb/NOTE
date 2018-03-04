@@ -40,6 +40,24 @@ sscanf 处理字符串。
 四个存储 args 的寄存器分别是：%rdi, %rsi, %rdx, %rcx
 sscanf 返回的数组存储在堆栈中
 
+9
+phase_4 是一个迭代，需要关注如何更新 %rdi, %rsi, %rdx 的内容，以及如何处理 %rax，这是迭代函数的返回。
+
+10
+phase_5 循环。
+通过输入的 string 和预先写入的”maduiersnfotvbyl”，生成一个新的字符串。
+目标是 “flyers”
+输入 string 为六位。
+
+11
+Segmented Addressing
+movq %fs:40, %rax
+movq %rax, 8(%rsp)
+
+12
+`read_six_number` 会将 string 转换为 list。
+各式为 `%d %d %d %d %d %d`
+
 
 
 
