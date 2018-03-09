@@ -58,7 +58,46 @@ movq %rax, 8(%rsp)
 `read_six_number` 会将 string 转换为 list。
 各式为 `%d %d %d %d %d %d`
 
+13
+phase_6
 
+lines: 117-151
+for i in range(0, 6):
+    arr[i] <= 6
+    for j in range(i, 6):
+        arr[i] != arr[j]
+
+两重循环，更新了
+* %rbp: arr[i]
+* %rbx: arr[j]
+* %r12d: range(i, 6) 中的 i
+* %r13: 和 rbp 有点重复？
+
+lines: 160-16d
+for i in range(0, 6):
+    arr[i] = 7 - arr[i]
+
+14
+0x6032d0 代表什么？
+都是 mov %edx，所以是 4 bytes
+
+lines: 174-1a9
+根据 arr 的数值大小，想 0x7fffffffe140 写入数据，间隔 8 bytes，实际从 reg 写入的只有 3 bytes.
+for i, n in enumerate(arr):
+    if n <= 1: 
+        m = 0x6032d0
+    else:
+        j = 1
+        while j < n:
+            m = val(n + 8)
+    targets[i] = n
+
+15
+0x6032d0 原来是 linked list，意识到了！
+struct linked_list {
+    int val;
+    linked_list *next;
+}
 
 
 
