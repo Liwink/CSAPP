@@ -1,3 +1,3 @@
-movq    $0x59b997fa, %rdi
+movq    $0x5561dc80, %rdi
 # pushq   0x004017ec
 ret
