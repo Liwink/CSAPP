@@ -3,30 +3,37 @@
 #include "unistd.h"
 #include "cachelab.h"
 
+void getoptions(int argc, char *argv[], int *s, int *E, int *b, char **t) {
+    int opt;
+    while ((opt = getopt(argc, argv, "s:E:b:t:")) != -1) {
+        switch (opt) {
+            case 's':
+                *s = *optarg - 48;
+                break;
+            case 'E':
+                *E = *optarg - 48;
+                break;
+            case 'b':
+                *b = *optarg - 48;
+                break;
+            case 't':
+                *t = optarg;
+        }
+    }
+
+}
+
 int main(int argc, char *argv[])
 {
-    int opt;
     int sVal, EVal, bVal;
     char *tVal;
+
     FILE *fp;
     char *line = NULL;
     size_t len = 100;
 
-    while ((opt = getopt(argc, argv, "s:E:b:t:")) != -1) {
-        switch (opt) {
-            case 's':
-                sVal = *optarg - 48;
-                break;
-            case 'E':
-                EVal = *optarg - 48;
-                break;
-            case 'b':
-                bVal = *optarg - 48;
-                break;
-            case 't':
-                tVal = optarg;
-        }
-    }
+    getoptions(argc, argv, &sVal, &EVal, &bVal, &tVal);
+
     printf("s: %d\n", sVal);
     printf("E: %d\n", EVal);
     printf("b: %d\n", bVal);
