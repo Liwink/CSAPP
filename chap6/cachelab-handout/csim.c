@@ -54,19 +54,12 @@ int main(int argc, char *argv[])
 
     getoptions(argc, argv, &SVal, &EVal, &BVal, &tVal);
 
-    // printf("s: %d\n", sVal);
-    // printf("E: %d\n", EVal);
-    // printf("b: %d\n", bVal);
-    // printf("t: %s\n", tVal);
-
-    // [set0_e0_tag, set0_e0_count, set0_e1_tag, set0_e1_count]
     cache_size = EVal * SVal * 2;
     printf("cache size: %zu\n", cache_size);
     int *cache = (int *) malloc(cache_size * sizeof(int));
     int j;
     for (j = 0; j < cache_size; j++) {
         cache[j] = -1;
-        // printf("%d,", cache[j]);
     }
 
     Position pos;
@@ -80,6 +73,7 @@ int main(int argc, char *argv[])
         readLine(&pos, line, BVal, SVal);
         if (pos.type == 'I')
             continue;
+
         is_hit = 0;
         is_evict = 1;
         small_count = count;
@@ -89,6 +83,7 @@ int main(int argc, char *argv[])
             if (cache[start + i * 2] == pos.tag) {
                 is_hit = 1;
                 is_evict = 0;
+                small_index = i;
                 break;
             }
             else if (cache[start + i * 2 + 1] == -1) {
@@ -107,10 +102,10 @@ int main(int argc, char *argv[])
         else {
             miss++;
             cache[start + small_index * 2] = pos.tag;
-            cache[start + small_index * 2 + 1] = count;
             if (is_evict == 1)
                 evict++;
         }
+        cache[start + small_index * 2 + 1] = count;
 
         if (pos.type == 'M')
             hit++;
