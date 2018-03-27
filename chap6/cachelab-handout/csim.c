@@ -61,12 +61,11 @@ int main(int argc, char *argv[])
     // [set0_e0_tag, set0_e0_count, set0_e1_tag, set0_e1_count]
     cache_size = EVal * SVal * 2;
     printf("cache size: %zu\n", cache_size);
-    int *cache = (int *) malloc(cache_size);
-    memset(cache, 0, sizeof (int) * cache_size);
+    int *cache = (int *) malloc(cache_size * sizeof(int));
     int j;
     for (j = 0; j < cache_size; j++) {
         cache[j] = -1;
-        printf("%d,", cache[j]);
+        // printf("%d,", cache[j]);
     }
 
     Position pos;
@@ -86,6 +85,7 @@ int main(int argc, char *argv[])
         for (i = 0; i < EVal; i++) {
             if (cache[start + i * 2] == pos.tag) {
                 is_hit = 1;
+                is_evict = 0;
                 break;
             }
             else if (cache[start + i * 2 + 1] == -1) {
@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
                 break;
             }
             else if (cache[start + i * 2 + 1] <= small_count) {
+                small_count = cache[start + i * 2 + 1];
                 small_index = i;
             }
         }
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
         else {
             miss++;
             cache[start + small_index * 2] = pos.tag;
-            cache[start + small_index * 2 + 1] = small_count;
+            cache[start + small_index * 2 + 1] = count;
             if (is_evict == 1)
                 evict++;
         }
@@ -115,6 +116,8 @@ int main(int argc, char *argv[])
         count++;
     }
 
+    free(cache);
+    cache = NULL;
     printSummary(hit, miss, evict);
     return 0;
 }
