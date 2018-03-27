@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -27,15 +28,15 @@ void getoptions(int argc, char *argv[], int *S, int *E, int *B, char **t) {
 typedef struct POSITION {
     char type;
     int set;
-    int tag;
-    int addr;
+    long tag;
+    long addr;
 } Position;
 
 void readLine(Position *pos, char *line, int BVal, int SVal) {
     char addr[10];
     sscanf(line, "%s %[^,]", &pos->type, addr);
-    pos->addr = (int) strtol(addr, NULL, 16);
-    int tmp = pos->addr / BVal;
+    pos->addr = strtol(addr, NULL, 16);
+    long tmp = pos->addr / BVal;
     pos->set = tmp % (int) SVal;
     pos->tag = tmp / (int) SVal;
 }
@@ -77,10 +78,12 @@ int main(int argc, char *argv[])
     fp = fopen(tVal, "r");
     while (getline(&line, &len, fp) != -1) {
         readLine(&pos, line, BVal, SVal);
+        if (pos.type == 'I')
+            continue;
         is_hit = 0;
         is_evict = 1;
         small_count = count;
-        printf("addr: %x; set: %x; tag: %x; type: %c\n", pos.addr, pos.set, pos.tag, pos.type);
+        printf("addr: %lx; set: %x; tag: %lx; type: %c\n", pos.addr, pos.set, pos.tag, pos.type);
         start = pos.set * EVal * 2;
         for (i = 0; i < EVal; i++) {
             if (cache[start + i * 2] == pos.tag) {
