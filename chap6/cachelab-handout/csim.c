@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
 
     cache_size = EVal * SVal * 2;
     printf("cache size: %zu\n", cache_size);
+    // long *cache
     int *cache = (int *) malloc(cache_size * sizeof(int));
     int j;
     for (j = 0; j < cache_size; j++) {
