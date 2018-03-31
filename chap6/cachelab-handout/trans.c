@@ -8,6 +8,116 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
+    int i, j, n, m;
+    int i_max, j_max;
+    int S = 12;
+    int cache_a[9];
+    int cache_b[4][8];
+
+    if (M != 61) {
+        for (n = 0; n < N / 8; n++) {
+            for (m = 0; m < M / 8; m++) {
+                for (i = 0; i < 8; i++) {
+                    if (n == m) {
+                        for (j = 0; j < 8; j++) {
+                            cache_a[j] = A[n * 8 + i][m * 8 + j];
+                        }
+                        for (j = 0; j < 4; j++) {
+                            cache_b[j][i] = cache_a[j];
+                        }
+                        for (j = 4; j < 8; j++) {
+                            B[m * 8 + j][n * 8 + i] = cache_a[j];
+                        }
+                    }
+                    else {
+                        for (j = 0; j < 4; j++) {
+                            cache_b[j][i] = A[n * 8 + i][m * 8 + j];
+                        }
+                        for (j = 4; j < 8; j++) {
+                            B[m * 8 + j][n * 8 + i] = A[n * 8 + i][m * 8 + j];
+                        }
+                    }
+                }
+                for (j = 0; j < 4; j++) {
+                    for (i = 0; i < 8; i++) {
+                        B[m * 8 + j][n * 8 + i] = cache_b[j][i];
+                    }
+                }
+            }
+        }
+    }
+    else {
+        for (n = 0; n < N / S; n++) {
+            for (m = 0; m < M / S; m++) {
+                i_max = S;
+                j_max = S;
+                if (n == N / S - 1) {
+                    i_max = N - n * S;
+                }
+                if (m == M / S - 1) {
+                    j_max = M - m * S;
+                }
+                for (i = 0; i < i_max; i++) {
+                    for (j = 0; j < j_max; j++) {
+                        B[m * S + j][n * S + i] = A[n * S + i][m * S + j];
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+char trans9_desc[] = "Transpose9";
+void trans9(int M, int N, int A[N][M], int B[M][N])
+{
+    // 61 * 67: 1993 misses.
+    int i, j, n, m;
+    int i_max, j_max;
+    int S = 12;
+
+    for (n = 0; n < N / S; n++) {
+        for (m = 0; m < M / S; m++) {
+            i_max = S;
+            j_max = S;
+            if (n == N / S - 1) {
+                i_max = N - n * S;
+            }
+            if (m == M / S - 1) {
+                j_max = M - m * S;
+            }
+            for (i = 0; i < i_max; i++) {
+                for (j = 0; j < j_max; j++) {
+                    B[m * S + j][n * S + i] = A[n * S + i][m * S + j];
+                }
+            }
+        }
+    }
+}
+
+char trans8_desc[] = "Transpose8";
+void trans8(int M, int N, int A[N][M], int B[M][N])
+{
+    int i, j, n, m;
+    int i_max, j_max;
+
+    for (n = 0; n < N / 8; n++) {
+        for (m = 0; m < M / 8; m++) {
+            i_max = 8;
+            j_max = 8;
+            if (n == N / 8 - 1) {
+                i_max = N - n * 8;
+            }
+            if (m == M / 8 - 1) {
+                j_max = M - m * 8;
+            }
+            for (i = 0; i < i_max; i++) {
+                for (j = 0; j < j_max; j++) {
+                    B[m * 8 + j][n * 8 + i] = A[n * 8 + i][m * 8 + j];
+                }
+            }
+        }
+    }
 }
 
 char trans7_desc[] = "Transpose7: try 4*8 cache";
@@ -212,14 +322,16 @@ void trans(int M, int N, int A[N][M], int B[M][N])
 void registerFunctions()
 {
     registerTransFunction(transpose_submit, transpose_submit_desc);
-    registerTransFunction(trans1, trans1_desc);
-    registerTransFunction(trans2, trans2_desc);
-    registerTransFunction(trans3, trans3_desc);
-    registerTransFunction(trans4, trans4_desc);
-    registerTransFunction(trans5, trans5_desc);
-    registerTransFunction(trans6, trans6_desc);
-    registerTransFunction(trans7, trans7_desc);
-    registerTransFunction(trans, trans_desc);
+    // registerTransFunction(trans1, trans1_desc);
+    // registerTransFunction(trans2, trans2_desc);
+    // registerTransFunction(trans3, trans3_desc);
+    // registerTransFunction(trans4, trans4_desc);
+    // registerTransFunction(trans5, trans5_desc);
+    // registerTransFunction(trans6, trans6_desc);
+    // registerTransFunction(trans7, trans7_desc);
+    // registerTransFunction(trans8, trans8_desc);
+    // registerTransFunction(trans9, trans9_desc);
+    // registerTransFunction(trans, trans_desc);
 
 }
 
