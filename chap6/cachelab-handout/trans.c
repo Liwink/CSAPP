@@ -10,7 +10,48 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
 }
 
-char trans6_desc[] = "Transpose6: 289 misses";
+char trans7_desc[] = "Transpose7: try 4*8 cache";
+void trans7(int M, int N, int A[N][M], int B[M][N])
+{
+    // 64 * 64: 1085 misses!
+    int i, j, n, m;
+    int cache_a[9];
+    int cache_b[4][8];
+
+    for (n = 0; n < N / 8; n++) {
+        for (m = 0; m < M / 8; m++) {
+            for (i = 0; i < 8; i++) {
+                if (n == m) {
+                    for (j = 0; j < 8; j++) {
+                        cache_a[j] = A[n * 8 + i][m * 8 + j];
+                    }
+                    for (j = 0; j < 4; j++) {
+                        cache_b[j][i] = cache_a[j];
+                    }
+                    for (j = 4; j < 8; j++) {
+                        B[m * 8 + j][n * 8 + i] = cache_a[j];
+                    }
+                }
+                else {
+                    for (j = 0; j < 4; j++) {
+                        cache_b[j][i] = A[n * 8 + i][m * 8 + j];
+                    }
+                    for (j = 4; j < 8; j++) {
+                        B[m * 8 + j][n * 8 + i] = A[n * 8 + i][m * 8 + j];
+                    }
+                }
+            }
+            for (j = 0; j < 4; j++) {
+                for (i = 0; i < 8; i++) {
+                    B[m * 8 + j][n * 8 + i] = cache_b[j][i];
+                }
+            }
+        }
+    }
+}
+
+
+char trans6_desc[] = "Transpose6: 1 * 8 cache, 289 misses";
 void trans6(int M, int N, int A[N][M], int B[M][N])
 {
     int i, j, n, m;
@@ -37,7 +78,7 @@ void trans6(int M, int N, int A[N][M], int B[M][N])
     }
 }
 
-char trans5_desc[] = "Transpose5: 287 misses";
+char trans5_desc[] = "Transpose5: register, 287 misses";
 void trans5(int M, int N, int A[N][M], int B[M][N])
 {
     int i, j, n, m;
@@ -81,7 +122,7 @@ void trans5(int M, int N, int A[N][M], int B[M][N])
     }
 }
 
-char trans4_desc[] = "Transpose4: ? misses";
+char trans4_desc[] = "Transpose4: memcpy";
 void trans4(int M, int N, int A[N][M], int B[M][N])
 {
     int i, j, n, m;
@@ -177,6 +218,7 @@ void registerFunctions()
     registerTransFunction(trans4, trans4_desc);
     registerTransFunction(trans5, trans5_desc);
     registerTransFunction(trans6, trans6_desc);
+    registerTransFunction(trans7, trans7_desc);
     registerTransFunction(trans, trans_desc);
 
 }
